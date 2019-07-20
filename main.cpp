@@ -33,33 +33,61 @@ std::vector<int> getPath(std::vector<int> path, int **arrs) {
 std::vector<std::vector<int>> gen_mutate(std::vector<std::vector<int>> arrs, std::vector<std::vector<int>> currPaths, std::vector<std::vector<std::vector<std::vector<bool>>>> *possibleCombinations) {
   // Loop through all arrays
   for (unsigned int x = 1; x < currPaths.size(); ++x) {
+    std::vector<std::vector<bool>> possibleCombinationsAcc;
+
     // Loop through all current paths
-    
-    // Initiate all values to 1 at start to signify all following branches are possible
-    // AND with possible values from follow branches. Resulting bool array will contain 1's everywhere a branch is possible
-    // If all values are 0, tree is impossible, discard
-    std::vector<bool> possibleBranchAcc(currPaths.at(x).size()-1, 1);
-
     for (unsigned int y = 0; y < currPaths.at(x).size(); ++y) {
-      unsigned int toChange = rand() % arrs.at(y).size();
-      unsigned int toChangeCheck = rand() % 100;
+      std::vector<std::vector<bool>> *possibleBranch = NULL;
 
-      std::vector<bool> *possibleBranch = NULL;
+      if (y > 0) {
+        if (y == 1)
+          possibleCombinationsAcc = (*possibleCombinations)[0][currPaths.at(x).at(0)];
+        else {
+          possibleBranch = &((*possibleCombinations)[y-1][currPaths.at(x).at(y-1)]);
 
-      if (y > 0)
-        possibleBranch = &((*possibleCombinations)[y][currPaths.at(x).at(y-1)][y-1]);
-      else
-        possibleBranch = &possibleBranchAcc;
+          for (unsigned int i = 0; i < possibleCombinationsAcc.size(); ++i) {
+            for (unsigned int j = 0; j < possibleCombinationsAcc.at(i).size(); ++j) {
+              possibleCombinationsAcc[i][j] = (*possibleBranch)[i][j] & possibleCombinationsAcc[i][j];
+            }
+          }
+        }
 
-      for (unsigned int z = 0; z < (*possibleBranch).size(); ++z) {
-        possibleBranchAcc[z] = possibleBranchAcc[z] & (*possibleBranch)[z];
-        std::cout << possibleBranchAcc[z] << ", ";
+        for (auto i : possibleCombinationsAcc) {
+          for (auto j : i) {
+            std::cout << j << ", ";
+          }
+          std::cout << std::endl;
+        }
+      }
+
+      for (auto i : currPaths.at(x)) {
+        std::cout << i << ",";
       }
       std::cout << std::endl;
+      std::cout << std::endl;
+
+      std::vector<int> availableBranches;
+
+      if (y == 0) {
+        for (unsigned int i = 0; i < arrs.at(y).size(); ++i) {
+          availableBranches.push_back(i);
+        }
+      } else {
+        for (unsigned int i = 0; i < possibleCombinationsAcc.at(y).size(); ++i)
+          if(possibleCombinationsAcc.at(y).at(i))
+            availableBranches.push_back(i);
+      }
+
+      // Maybe add branch recovery here in the future
+      if (availableBranches.size() == 0)
+        std::cout << "ERROR\n";
+
+      unsigned int toChange = rand() % availableBranches.size();
+      unsigned int toChangeCheck = rand() % 100;
 
       // x percentage chance of mutation
       if (toChangeCheck < 100) {
-        currPaths.at(x).at(y) = toChange;
+        currPaths.at(x).at(y) = availableBranches.at(toChange);
       }
     }
     std::cout << std::endl;
@@ -128,7 +156,7 @@ bool filt(int a, int b) {
 
 void gen(std::vector<std::vector<int>> arrs, int compare(int, int), int fitness(std::vector<std::vector<int>>*, std::vector<int>, int), bool filter(int, int)) {
   int groups = 1;
-  int cycles = 2;
+  int cycles = 5;
   int groupSize = 2;
 
   std::vector<std::vector<std::vector<std::vector<bool>>>> possibleCombinations;
@@ -199,8 +227,6 @@ void gen(std::vector<std::vector<int>> arrs, int compare(int, int), int fitness(
 
     std::cout << std::endl;
   }
-  //std::cout << possibleCombinations[1][1][1].size() << std::endl;
-
 }
 
 int main() {
@@ -216,9 +242,10 @@ int main() {
 
   std::vector<std::vector<int>> arrs = {arr1, arr2, arr3, arr4, arr5, arr6, arr7};*/
 
-  std::vector<int> arr1 = {1,0};
-  std::vector<int> arr2 = {0,2};
-  std::vector<int> arr3 = {0,0};
+  std::vector<int> arr1 = {1,0,0,2};
+  std::vector<int> arr2 = {0,2,0,3};
+  std::vector<int> arr3 = {0,0,0,0};
+
   std::vector<std::vector<int>> arrs = {arr1, arr2, arr3};
 
   gen(arrs, comp, fit, filt);
