@@ -94,7 +94,7 @@ gen_trim_struct gen_trim(std::vector<std::vector<void*>> arrs, std::vector<std::
 
   std::vector<int> fitTop = currPaths.at(fitPlaceHigh);
 
-  //std::cout << "Fit: " << fitValueHigh << std::endl;
+  std::cout << "Fit: " << fitValueHigh << std::endl;
   gen_trim_struct topFound;
   topFound.fitness = fitValueHigh;
   topFound.top = fitTop;
@@ -127,8 +127,70 @@ float standard_deviation(std::vector<int> fitnesses) {
   return sqrt(var);
 }
 
-std::vector<int> initialBranch(std::vector<std::vector<std::vector<std::vector<bool>>>> possibleCombinations) {
-  
+// returns all possible paths after used path
+std::vector<std::vector<int>> getPossiblePaths(std::vector<std::vector<std::vector<std::vector<bool>>>> *possibleCombinations, std::vector<int> path) {
+  std::vector<std::vector<int>> paths;
+
+  if (path.size() > 0) {
+    // go until the end of the current path, return if not possible
+    std::vector<std::vector<bool>> acc = (*possibleCombinations)[0][path[0]];
+    for (int x = 1; x < path.size(); ++x) {
+      std::vector<std::vector<bool>> joinWith = (*possibleCombinations)[x][path[x]];
+      for (int i = 0; i < joinWith.size(); ++i) {
+        for (int j = 0; j < joinWith.at(i).size(); ++j) {
+          acc[i][j] = acc[i][j] & joinWith[i][j];
+        }
+      }
+    }
+
+    /*for (int i = 0; i < acc.size(); ++i) {
+      for (int j = 0; j < acc.at(i).size(); ++j) {
+        std::cout << acc[i][j] << ", ";
+      }
+      std::cout << std::endl;
+    }*/
+
+    // Loop through values possible for next value.
+    // These values are found on the line one after the path ends
+    for (int x = 0; x < acc[path.size()].size(); x++) {
+      if (acc[path.size()][x]) {
+        // append working value to new path
+        std::vector<int> newPath = path;
+        newPath.push_back(x);
+        paths.push_back(newPath);
+      }
+    }
+  } else {
+    for (int x = 0; x < (*possibleCombinations)[path.size()].size(); ++x) {
+      // append working value to new path
+      std::vector<int> newPath = path;
+      newPath.push_back(x);
+      paths.push_back(newPath);
+    }
+
+  }
+
+  return paths;
+}
+
+// Get a working branch to start with
+std::vector<int> initialBranch(std::vector<std::vector<std::vector<std::vector<bool>>>> possibleCombinations, std::vector<int> base) {
+  if (base.size() == possibleCombinations.size())
+    return base;
+
+  std::vector<std::vector<int>> paths = getPossiblePaths(&possibleCombinations, base);
+
+  if (paths.size() == 0) {
+    return {};
+  }
+
+  for (auto x : paths) {
+    if (initialBranch(possibleCombinations, x).size() > 0) {
+      return initialBranch(possibleCombinations, x);
+    }
+  }
+
+  return {};
 }
 
 void gen(std::vector<std::vector<void*>> arrs, int compare(int, int), int fitness(std::vector<std::vector<void*>>*, std::vector<int>, int), bool filter(void*, void*, int, int)) {
@@ -163,14 +225,14 @@ void gen(std::vector<std::vector<void*>> arrs, int compare(int, int), int fitnes
   }
 
   std::vector<std::vector<std::vector<int>>> currPathsGroup;
-  std::vector<int> base_path;
 
   if (arrs.size() == 0)
     return;
 
-  for (unsigned int x = 0; x < arrs.size(); ++x) {
-    base_path.push_back(0);
-  }
+  std::vector<int> base_path = initialBranch(possibleCombinations, {});
+
+  if (base_path.size() == 0)
+    return;
 
   // init
   for (int x = 0; x < groups; ++x) {
@@ -186,7 +248,7 @@ void gen(std::vector<std::vector<void*>> arrs, int compare(int, int), int fitnes
       currPathsGroup.at(x) = gen_mutate(arrs, currPathsGroup.at(x), &possibleCombinations);
     }
 
-    /*for (auto x : currPathsGroup) {
+    for (auto x : currPathsGroup) {
       for (unsigned int i = 0; i < x.size(); ++i) {
         for (auto z : x.at(i)) {
           std::cout << z << ", ";
@@ -194,7 +256,7 @@ void gen(std::vector<std::vector<void*>> arrs, int compare(int, int), int fitnes
       std::cout << std::endl;
       }
       std::cout << "_______________________" << std::endl;
-    }*/
+    }
 
     // trim
     std::vector<int> endCondition;
