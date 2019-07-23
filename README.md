@@ -1,3 +1,4 @@
-Genetic Algorithm "Library"
+### Montecarlo randomization + Genetic Algorithm
 
-Designed for use with GuelphScheduler2
+Find optimal paths given a fitness function, compare function,  and filter function
+Optimized for high memory usage and fast completion time
