@@ -248,7 +248,7 @@ void gen(std::vector<std::vector<void*>> arrs, int compare(int, int), int fitnes
       currPathsGroup.at(x) = gen_mutate(arrs, currPathsGroup.at(x), &possibleCombinations);
     }
 
-    for (auto x : currPathsGroup) {
+    /*for (auto x : currPathsGroup) {
       for (unsigned int i = 0; i < x.size(); ++i) {
         for (auto z : x.at(i)) {
           std::cout << z << ", ";
@@ -256,7 +256,7 @@ void gen(std::vector<std::vector<void*>> arrs, int compare(int, int), int fitnes
       std::cout << std::endl;
       }
       std::cout << "_______________________" << std::endl;
-    }
+    }*/
 
     // trim
     std::vector<int> endCondition;

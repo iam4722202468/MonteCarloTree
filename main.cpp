@@ -10,7 +10,7 @@
 #include "mcr.h"
 
 int comp(int in1, int in2) {
-  return -in1+in2;
+  return in1-in2;
 }
 
 int fit(std::vector<std::vector<void*>> *arrs, std::vector<int> currPath, int pathNum) {
@@ -22,7 +22,8 @@ int fit(std::vector<std::vector<void*>> *arrs, std::vector<int> currPath, int pa
 }
 
 bool filt(void* a, void* b, int aPlace, int bPlace) {
-  if (*(int*)a == *(int*)b || (*(int*)a < *(int*)b && aPlace < bPlace))
+  //if (*(int*)a == *(int*)b || (*(int*)a < *(int*)b && aPlace < bPlace))
+  if (*(int*)a == *(int*)b)
     return false;
   return true;
 }
