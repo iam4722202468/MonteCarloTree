@@ -1,3 +1,5 @@
+#include <omp.h>
+
 #include "mcr.h"
 
 std::vector<std::vector<int>> gen_mutate(std::vector<std::vector<void*>> arrs, std::vector<std::vector<int>> currPaths, std::vector<std::vector<std::vector<std::vector<bool>>>> *possibleCombinations) {
@@ -194,10 +196,6 @@ std::vector<int> initialBranch(std::vector<std::vector<std::vector<std::vector<b
 }
 
 void gen(std::vector<std::vector<void*>> arrs, int compare(int, int), int fitness(std::vector<std::vector<void*>>*, std::vector<int>, int), bool filter(void*, void*, int, int)) {
-  int groups = 15;
-  int cycles = 200;
-  int groupSize = 10;
-
   std::vector<std::vector<std::vector<std::vector<bool>>>> possibleCombinations;
 
   // Generate possibleCombinations array
@@ -235,16 +233,19 @@ void gen(std::vector<std::vector<void*>> arrs, int compare(int, int), int fitnes
     return;
 
   // init
-  for (int x = 0; x < groups; ++x) {
+  for (int x = 0; x < GROUPS; ++x) {
     std::vector<std::vector<int>> currPaths;
-    currPaths = gen_base(currPaths, base_path, groupSize);
+    currPaths = gen_base(currPaths, base_path, GROUPSIZE);
 
     currPathsGroup.push_back(currPaths);
   }
 
-  for (int cycle = 0; cycle < cycles; ++cycle) {
+  for (int cycle = 0; cycle < CYCLES; ++cycle) {
     // mutate
-    for (int x = 0; x < groups; ++x) {
+
+    #pragma omp parallel
+    #pragma omp for
+    for (int x = 0; x < GROUPS; ++x) {
       currPathsGroup.at(x) = gen_mutate(arrs, currPathsGroup.at(x), &possibleCombinations);
     }
 
@@ -260,11 +261,11 @@ void gen(std::vector<std::vector<void*>> arrs, int compare(int, int), int fitnes
 
     // trim
     std::vector<int> endCondition;
-    for (int x = 0; x < groups; ++x) {
+    for (int x = 0; x < GROUPS; ++x) {
       gen_trim_struct topGen = gen_trim(arrs, currPathsGroup.at(x), x, compare, fitness);
 
       currPathsGroup.at(x).clear();
-      currPathsGroup.at(x) = gen_base(currPathsGroup.at(x), topGen.top, groupSize);
+      currPathsGroup.at(x) = gen_base(currPathsGroup.at(x), topGen.top, GROUPSIZE);
     }
 
     //std::cout << std::endl;

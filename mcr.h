@@ -6,6 +6,11 @@
 #include <string>
 #include <vector>
 
+#define GROUPS 15
+#define CYCLES 200
+#define GROUPSIZE 10
+
+
 struct gen_trim_struct {
   std::vector<int> top;
   int fitness;

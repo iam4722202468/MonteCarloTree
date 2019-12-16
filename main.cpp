@@ -6,7 +6,6 @@
 #include <string>
 #include <vector>
 
-#include "course.h"
 #include "mcr.h"
 
 int comp(int in1, int in2) {
