@@ -28,7 +28,4 @@ ___
 - Best child is chosen to become a parent
 ___
 ### Uses
-- I plan to implement this in my course scheduling algorithm to decrease schedule generation times to under 1 second, and to reduce memory usage
-___
-### Learn More
-http://beta.aceparent.me/#/montecarlotree
+- This has been implemented in my course scheduling algorithm to decrease schedule generation times to under 1 second, and to reduce memory usage
