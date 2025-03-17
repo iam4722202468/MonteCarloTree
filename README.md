@@ -24,7 +24,7 @@ ___
 - This uses a combination of Montecarlo Randomization and genetic algorithms to find an optimal path.
 - Filters are calculated and stored before the genetic algorithm is run to save time
 - A working path is found through bruteforce to use as the original parent for all groups
-- Children are have slight variations from parent
+- Children have slight variations from parent
 - Best child is chosen to become a parent
 ___
 ### Uses
